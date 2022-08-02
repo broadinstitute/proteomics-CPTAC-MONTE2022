@@ -12,11 +12,18 @@
 
 ## import libraries
 library(shiny)
-library(ComplexHeatmap)
 library(dplyr)
 library(circlize)
 library(ggplot2)
 library(WriteXLS)
+
+if (!require("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+BiocManager::install("BiocGenerics")
+BiocManager::install("ComplexHeatmap")
+
+library(ComplexHeatmap)
 
 source("src/shinyModules.R")
 source("src/helperFunctions.R")
