@@ -290,6 +290,7 @@ myComplexHeatmap <- function(table, params) {
     row.anno <- disco.row.anno[which(disco.row.anno$geneSymbol %in% genes.vec), ]
     
     genes.Table <- getHMTableDisco(genes.Table, row.anno, params) 
+    genes.Table <- genes.Table[,c(1:3, order(names(genes.Table)[-(1:3)])+3)]
     genes.Matrix <- as.matrix(genes.Table[,-(1:3)])
   }
   
@@ -393,6 +394,7 @@ getHeatmapAnnotations <- function(participants, anno_table, anno.all, params) {
   
   # make sure annotations dataframe is ordered the same as the heatmap
   anno <- anno[order(anno$Sample.ID), ] 
+  rownames(anno) <- anno$Sample.ID
   anno.fig <- anno[, -(1)]
   
   return(anno.fig)
@@ -495,7 +497,7 @@ makeHLATables <- function (gene, hla.table) {
 ###############################################################################
 ## FOR TESTING PURPOSES ONLY
 
-# # parameters
+# parameters
 # params <- list(
 #   genes.char = "MACF1, BRDT, SLK, PIK3CA, PIK3CD, SOX2, TP63, VIM",
 #   zscore = 'row',
@@ -503,9 +505,9 @@ makeHLATables <- function (gene, hla.table) {
 #   min.val = -3,
 #   max.val = 3,
 #   sort.after = 'Multi.omic.subtype',
-#   id = "MonteTab")
+#   id = "DiscoTab")
 # 
-# table <- monte_table
+# table <- disco_table
 # 
 # HM.out <- myComplexHeatmap(table, params)
 # 
