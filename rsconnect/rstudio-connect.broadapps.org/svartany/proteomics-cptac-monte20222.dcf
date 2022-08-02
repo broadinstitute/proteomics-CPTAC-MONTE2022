@@ -1,0 +1,14 @@
+name: proteomics-cptac-monte20222
+title: proteomics-CPTAC-MONTE2022
+username: svartany
+account: svartany
+server: rstudio-connect.broadapps.org
+hostUrl: https://rstudio-connect.broadapps.org/__api__
+appId: 100
+bundleId: 410
+url: https://rstudio-connect.broadapps.org/content/27835219-2b0e-4cb9-b752-87f2f7bfe661/
+when: 1659464166.56035
+lastSyncTime: 1659464166.56035
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: src/addHLAData.R|src/cleanup_data.R

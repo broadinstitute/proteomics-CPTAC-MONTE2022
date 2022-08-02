@@ -10,26 +10,26 @@
 ## Note: code is adapted from Karsten Krug's previous shiny apps
 ###############################################################################
 
+###############################################################################
+# # Use this when publishing to RStudio Connect
+# options(repos = c(options('repos')$repos, 
+#                   bioc = 'https://bioconductor.org/packages/3.15/bioc/'))
+###############################################################################
+
+
 ## import libraries
 library(shiny)
 library(dplyr)
 library(circlize)
 library(ggplot2)
 library(WriteXLS)
-
-if (!require("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
-}
-BiocManager::install("BiocGenerics")
-BiocManager::install("ComplexHeatmap")
-
 library(ComplexHeatmap)
 
 source("src/shinyModules.R")
 source("src/helperFunctions.R")
 
 ## import the data
-load("data/MONTE_data_2022-07-18.RData")
+load("data/MONTE_data_2022-08-02.RData")
 
 ## global parameters
 TITLESTRING <<- '<font size="5" face="times"><i><b>"MONTE enables serial immunopeptidome, ubiquitylome, proteome, phosphoproteome, acetylome analyses of sample-limited tissues"</b></i> (<a href="https://www.biorxiv.org/content/10.1101/2021.06.22.449417v1" target="_blank_">citation here</a>)</font><br>'
@@ -43,8 +43,7 @@ GENEMAX <<- 20
 monte_participants <<- unique(monte_table$participant)
 
 #########################################
-# small edit for HLA table
-hla.table$directory <- sub('-', '.', hla.table$directory)
+
 
 
 ##########################################
