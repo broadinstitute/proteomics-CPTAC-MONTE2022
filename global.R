@@ -24,6 +24,8 @@ library(circlize)
 library(ggplot2)
 library(WriteXLS)
 library(ComplexHeatmap)
+library(glue)
+
 
 source("src/shinyModules.R")
 source("src/helperFunctions.R")
@@ -70,11 +72,25 @@ disco.params <- list( #oms = c("Transcriptome", "Ubiquitylome", "Proteome", "Pho
                      annotations = c("In.MONTE", names(rev(anno.all))),
                      annotations.start = names(rev(anno.all))[1])
 monte.params <- list( #oms = c("Immunopeptidome", "Ubiquitylome", "Proteome", "Phosphoproteome", "Acetylome"),
-                     genes.all = sort(unique(monte_table$geneSymbol)),
-                     #genes.all = sort(unique(disco.row.anno$geneSymbol)),
+                     # genes.all = sort(unique(monte_table$geneSymbol)),
+                     genes.all = sort(unique(disco.row.anno$geneSymbol)),
                      genes.start = GENESSTART <<- c('EGFR', 'RB1', 'KRAS', 'STK11'),
                      annotations = c("Experiment", names(rev(anno.all))),
                      annotations.start = names(rev(anno.all))[1])
+
+##############################
+## dataset descriptions
+disco.params$data_description <- glue( '<p>Copy number aberrations are relative to matching normal blood sample and are on log2(CNA)-1 scale. For other data types the heatmap depicts abundances observed in tumor relative to normal adjacent tissue (NAT).</p>\n
+                   <table border-spacing:5px><tr><th>Type</th><th># features</th><th># samples</th></tr>\n
+                   <tr><td>CNA</td><td>{sum(grepl("_CNA", disco.row.anno$DataType))}</td><td>{ncol(disco_table)}</td></tr>\n
+                   <tr><td>mRNA</td><td>{sum(grepl("_RNAseq", disco.row.anno$DataType))}</td><td>{ncol(disco_table)}</td></tr>\n
+                   <tr><td>Protein</td><td>{sum(grepl("_Protein", disco.row.anno$DataType))}</td><td>{ncol(disco_table)}</td></tr>\n
+                   <tr><td>phosphosites </td><td>{sum(grepl("_pSTY", disco.row.anno$DataType))}</td><td>{ncol(disco_table)}</td></tr>\n
+                   <tr><td>acetylsites</td><td>{sum(grepl("_acK", disco.row.anno$DataType))}</td><td>{ncol(disco_table)}</td></tr>\n
+                   </table>\n
+                   <br><p>For more details please see our reference publication <a href="https://www.cell.com/cell/fulltext/S0092-8674(20)30744-3" target="_blank_">Gillette <i>et al.</i> Cell, 2020</a></p>')
+monte.params$data_description <- 'Insert dataset description here!'
+
 
 ##############################
 ## color mappings for 'anno.all'

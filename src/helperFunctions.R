@@ -43,7 +43,7 @@ extractGenes <- function(genes.char, table){
     genes.vec <- setdiff(genes.vec, genes.notInTable)
   }
   
-  return(genes.vec)
+  return(list(genes.vec=genes.vec, genes.notInTable=genes.notInTable))
 }
 
 ## make row label
@@ -89,17 +89,6 @@ getHMTable <- function(gene, table, params) {
   }
   
   # TODO: pick only one protein abundance to show 
-  
-  # use only most variable VM sites (if requested)
-  if (PTMsites == "most variable") {
-    HM.table <- extractMostVariable(HM.table)
-  }
-  
-  # z-score rows if requested
-  if (zscore == "row") {
-    HM.table[,-(1:3)] <- t(apply(HM.table[,-(1:3)], 1, 
-                         function(x)(x-mean(x, na.rm=T))/sd(x, na.rm=T)))
-  }
   
   return (HM.table)
 }
@@ -177,19 +166,6 @@ getHMTableDisco <- function(genes.Table, row.anno, params) {
                                   ome = ome,
                                   row_label = row_labels),
                        genes.Table)
-  
-  # use only most variable VM sites (if requested)
-  if (params$PTMsites == "most variable") {
-    genes.Table <- extractMostVariable(genes.Table)
-  }
-  
-  # z-score rows if requested
-  if (params$zscore == "row") {
-    cna.idx <- which(genes.Table$ome == 'CNA') #exclude CNA from z-scoring
-    genes.Table[-(cna.idx),-(1:3)] <- t(apply(genes.Table[-(cna.idx),-(1:3)], 1, 
-                                 function(x)(x-mean(x, na.rm=T))/sd(x, na.rm=T)))
-  }
-  
   rownames(genes.Table) <- make.unique(genes.Table$row_label, sep= ' ')
   
   return (genes.Table)
@@ -233,45 +209,65 @@ myComplexHeatmap <- function(table, params) {
     params$expt <- unique(table$expt)
     
     # extract genes
-    genes.vec <- extractGenes(genes.char, select(table, geneSymbol))
-    if (length(genes.vec) == 0) {
-      stop("Genes were not found in the dataset")
+    genes.all <- extractGenes(genes.char, select(table, geneSymbol))
+    genes.vec <- genes.all$genes.vec
+    genes.notInMONTE <- genes.all$genes.notInTable
+    
+    # make table of NAs for genes.notInMONTE (to show that they're not in MONTE data)
+    if (length(genes.notInMONTE) > 0) {
+      genes.notInMONTE.Table <- data.frame(matrix(nrow=length(genes.notInMONTE),
+                                                  ncol = 3 + num.participants*2))
+      names(genes.notInMONTE.Table) <- c("geneSymbol", "ome", "row_label", sort(unique(table$col_label)))
+      genes.notInMONTE.Table$geneSymbol <- genes.notInMONTE
+      genes.notInMONTE.Table$row_label <- paste(genes.notInMONTE.Table$geneSymbol,
+                                                "not in MONTE dataset",
+                                                sep = ' ')
     }
     
-    # extract rows for selected genes
-    table <- filter(table, geneSymbol %in% genes.vec)
-    
-    # make gene.Table and gene.Matrix for input to heatmap
-    genes.Table <- lapply(genes.vec, function(x) getHMTable(x, table, params))
-    if (is.list(genes.Table)) {
-      genes.Table <- do.call(rbind, genes.Table)
+    # make genes.Table for the genes actually in the dataset
+    if (length(genes.vec) > 0){
+      # extract rows for selected genes
+      table <- filter(table, geneSymbol %in% genes.vec)
+      
+      # make gene.Table and gene.Matrix for input to heatmap
+      genes.Table <- lapply(genes.vec, function(x) getHMTable(x, table, params))
+      if (is.list(genes.Table)) {
+        genes.Table <- do.call(rbind, genes.Table)
+      }
+      genes.Table <- genes.Table[rowSums(is.na(genes.Table)) != ncol(genes.Table), ]
+      
+      # add in HLA data
+      genes.Table <- addHLAToTable(genes.Table, genes.vec)
+      
+      # add RNA-seq and CNA by extracting from disco_table
+      monte.participants.in.disco <- disco_table[, sort(participants.unique)]
+      disco.genes.Table <- monte.participants.in.disco[which(disco.row.anno$geneSymbol %in% genes.vec), ]
+      row.anno <- disco.row.anno[which(disco.row.anno$geneSymbol %in% genes.vec), ]
+      disco.genes.Table <- getHMTableDisco(disco.genes.Table, row.anno, params) 
+      disco.genes.Table <- filter(disco.genes.Table, ome %in% c('CNA', 'RNAseq'))
+      disco.genes.Table <- cbind(disco.genes.Table, disco.genes.Table[, -(1:3)])
+      names(disco.genes.Table) <- c(names(disco.genes.Table)[1:3],
+                                    paste(names(disco.genes.Table)[4:13], ': hlaft', sep=''),
+                                    paste(names(disco.genes.Table)[4:13], ': noip', sep=''))
+      column.order <- names(genes.Table)
+      disco.genes.Table <- disco.genes.Table[, column.order]
+      disco.genes.Table$row_label <- disco.genes.Table$ome
+      genes.Table <- rbind(genes.Table, disco.genes.Table)
+      
+      # order by gene symbol
+      genes.Table <- genes.Table[order(genes.Table$geneSymbol), ]
+      
+      # use only most variable VM sites (if requested)
+      if (params$PTMsites == "most variable") {
+        genes.Table <- extractMostVariable(genes.Table)
+      }
+      
     }
-    genes.Table <- genes.Table[rowSums(is.na(genes.Table)) != ncol(genes.Table), ]
-    
-    # add in HLA data
-    genes.Table <- addHLAToTable(genes.Table, genes.vec)
-    
-    # add RNA-seq and CNA by extracting from disco_table
-    monte.participants.in.disco <- disco_table[, sort(participants.unique)]
-    disco.genes.Table <- monte.participants.in.disco[which(disco.row.anno$geneSymbol %in% genes.vec), ]
-    row.anno <- disco.row.anno[which(disco.row.anno$geneSymbol %in% genes.vec), ]
-    disco.genes.Table <- getHMTableDisco(disco.genes.Table, row.anno, params) 
-    disco.genes.Table <- filter(disco.genes.Table, ome %in% c('CNA', 'RNAseq'))
-    disco.genes.Table <- cbind(disco.genes.Table, disco.genes.Table[, -(1:3)])
-    names(disco.genes.Table) <- c(names(disco.genes.Table)[1:3],
-                                  paste(names(disco.genes.Table)[4:13], ': hlaft', sep=''),
-                                  paste(names(disco.genes.Table)[4:13], ': noip', sep=''))
-    column.order <- names(genes.Table)
-    disco.genes.Table <- disco.genes.Table[, column.order]
-    disco.genes.Table$row_label <- disco.genes.Table$ome
-    genes.Table <- rbind(genes.Table, disco.genes.Table)
-    
-    # order by gene symbol
-    genes.Table <- genes.Table[order(genes.Table$geneSymbol), ]
-    
-    # make matrix version for heatmap
-    genes.Matrix <- as.matrix(genes.Table[,-(1:3)])
-    rownames(genes.Matrix) <- genes.Table$row_label
+      
+    # combine genes.Table with genes.notInMONTE.Table if they both exist
+    if (length(genes.vec) > 0 & length(genes.notInMONTE) > 0) {
+      genes.Table <- rbind(genes.Table, genes.notInMONTE.Table)
+    }
     
   }
   
@@ -282,10 +278,8 @@ myComplexHeatmap <- function(table, params) {
     params$expt <- "disco"
     
     # extract genes
-    genes.vec <- extractGenes(genes.char, select(disco.row.anno, geneSymbol))
-    if (length(genes.vec) == 0) {
-      stop("Genes were not found in the dataset")
-    }
+    genes.all <- extractGenes(genes.char, select(disco.row.anno, geneSymbol))
+    genes.vec <- genes.all$genes.vec
     
     # extract rows for that gene
     genes.Table <- table[which(disco.row.anno$geneSymbol %in% genes.vec), ]
@@ -293,11 +287,26 @@ myComplexHeatmap <- function(table, params) {
     
     genes.Table <- getHMTableDisco(genes.Table, row.anno, params) 
     genes.Table <- genes.Table[,c(1:3, order(names(genes.Table)[-(1:3)])+3)]
-    genes.Matrix <- as.matrix(genes.Table[,-(1:3)])
+    
+    # use only most variable VM sites (if requested)
+    if (params$PTMsites == "most variable") {
+      genes.Table <- extractMostVariable(genes.Table)
+    }
   }
   
   else {
     stop("Invalid dataset parameter")
+  }
+  
+  # make matrix to feed into heatmap
+  genes.Matrix <- as.matrix(genes.Table[,-(1:3)])
+  rownames(genes.Matrix) <- genes.Table$row_label
+  
+  # z-score rows if requested
+  if (params$zscore == "row") {
+    exclude.idx <- which(genes.Table$ome %in% c('CNA', 'HLA.cls1', 'HLA.cls2')) #exclude CNA and HLA from z-scoring
+    genes.Matrix[-(exclude.idx),] <- t(apply(genes.Table[-(exclude.idx),-(1:3)], 1, 
+                                              function(x)(x-mean(x, na.rm=T))/sd(x, na.rm=T)))
   }
   
   # define color map

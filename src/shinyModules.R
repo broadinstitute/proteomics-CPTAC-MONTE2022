@@ -79,11 +79,10 @@ viewerTabUI <- function(id, label = "Viewer Tab", params) {
      
      ## Instructions
      p(strong("Getting started")),
-     p("Enter your gene names of interest (official gene symbols, e.g. PIK3CA) into the text field. You can enter up to 20 genes."),
+     p("Enter your gene names of interest (official gene symbols, e.g. EGFR) into the text field. You can enter up to 20 genes."),
      br(),
      p(strong("Dataset")),
-     p("Insert dataset description here")
-     
+     HTML(params$data_description),
      
     ) #end wellPanel
     ), #end column
