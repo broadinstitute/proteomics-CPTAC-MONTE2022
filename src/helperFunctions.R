@@ -109,15 +109,17 @@ extractMostVariable <- function(HM.table) {
   
   omes <- c("phos", "acet", "ubiq")
   for (ome in omes) {
-    ## extract MS phospho
-    vm.idx <- which(HM.table$ome == ome)
-    if( length(vm.idx) > 1 ){
-      
-      vm.sd <- apply(HM.table[vm.idx, -(1:3)], 1, sd, na.rm=T)
-      max.idx <- vm.idx[which.max(vm.sd)]
-      rm.idx <- setdiff(vm.idx, max.idx)
-      
-      HM.table <- HM.table[-(rm.idx), ]
+    for (gene in unique(HM.table$geneSymbol)) {
+      ## extract MS phospho
+      vm.idx <- which(HM.table$ome == ome & HM.table$geneSymbol == gene)
+      if( length(vm.idx) > 1 ){
+        
+        vm.sd <- apply(HM.table[vm.idx, -(1:3)], 1, sd, na.rm=T)
+        max.idx <- vm.idx[which.max(vm.sd)]
+        rm.idx <- setdiff(vm.idx, max.idx)
+        
+        HM.table <- HM.table[-(rm.idx), ]
+      }
     }
   }
   
