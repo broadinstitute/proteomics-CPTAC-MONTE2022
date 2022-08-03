@@ -220,7 +220,7 @@ myComplexHeatmap <- function(table, params) {
       names(genes.notInMONTE.Table) <- c("geneSymbol", "ome", "row_label", sort(unique(table$col_label)))
       genes.notInMONTE.Table$geneSymbol <- genes.notInMONTE
       genes.notInMONTE.Table$row_label <- paste(genes.notInMONTE.Table$geneSymbol,
-                                                "not in MONTE dataset",
+                                                "no multi-ome data avaliable",
                                                 sep = ' ')
     }
     
@@ -350,7 +350,8 @@ myComplexHeatmap <- function(table, params) {
                 name = 'relative abundance',
                 height = unit(0.5, 'cm') * nrow(genes.Matrix),
                 column_names_side = "top",
-                column_names_rot = 45)
+                column_names_rot = 45,
+                column_gap = if (is.double(column.to.sort)) {unit(0, "mm")} else {unit(1, "mm")})
   
   # combine annotation table with genes.Table for final output
   rownames(anno.fig) <- colnames(genes.Matrix)

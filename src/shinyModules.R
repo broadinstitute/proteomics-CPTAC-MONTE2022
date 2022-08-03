@@ -329,7 +329,7 @@ HLATableServer <- function(id, hla.table, params) {
       # update selectizeInput in ui
       updateSelectizeInput(session,
                            inputId = "hla.gene",
-                           choices = params$genes.all,
+                           choices = params$genes.HLA,
                            selected=params$genes.start[1],
                            server=T)
       

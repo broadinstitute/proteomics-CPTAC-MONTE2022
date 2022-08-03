@@ -68,12 +68,14 @@ anno.all <- rev(c('Multi.omic.subtype'='NMF.consensus',
 ## dataset-specific parameters
 disco.params <- list( #oms = c("Transcriptome", "Ubiquitylome", "Proteome", "Phosphoproteome", "Acetylome"),
                      genes.all = sort(unique(disco.row.anno$geneSymbol)),
+                     
                      genes.start = GENESSTART <<- c('EGFR', 'RB1', 'KRAS', 'STK11'),
                      annotations = c("In.MONTE", names(rev(anno.all))),
                      annotations.start = names(rev(anno.all))[1])
 monte.params <- list( #oms = c("Immunopeptidome", "Ubiquitylome", "Proteome", "Phosphoproteome", "Acetylome"),
                      # genes.all = sort(unique(monte_table$geneSymbol)),
                      genes.all = sort(unique(disco.row.anno$geneSymbol)),
+                     genes.HLA = sort(unique(hla.table$geneSymbol)),
                      genes.start = GENESSTART <<- c('EGFR', 'RB1', 'KRAS', 'STK11'),
                      annotations = c("Experiment", names(rev(anno.all))),
                      annotations.start = names(rev(anno.all))[1])
