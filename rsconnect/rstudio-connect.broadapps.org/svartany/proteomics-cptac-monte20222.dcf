@@ -5,10 +5,10 @@ account: svartany
 server: rstudio-connect.broadapps.org
 hostUrl: https://rstudio-connect.broadapps.org/__api__
 appId: 100
-bundleId: 416
+bundleId: 417
 url: https://rstudio-connect.broadapps.org/content/27835219-2b0e-4cb9-b752-87f2f7bfe661/
-when: 1659552527.84469
-lastSyncTime: 1659552527.84469
+when: 1659641544.3986
+lastSyncTime: 1659641544.39861
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: original-data/data-luad-v3.2-tumor-over-nat.RData|original-data/hla_table_combined_filtered_2022-07-13.rds|original-data/luad-v3.2-sample-annotation-all.csv|original-data/MONTE_data_2022-07-18.RData|original-data/MONTE_mega-table_2022-07-05.rds|src/addHLAData.R|src/cleanup_data.R
