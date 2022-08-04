@@ -267,6 +267,8 @@ myComplexHeatmap <- function(table, params) {
     # combine genes.Table with genes.notInMONTE.Table if they both exist
     if (length(genes.vec) > 0 & length(genes.notInMONTE) > 0) {
       genes.Table <- rbind(genes.Table, genes.notInMONTE.Table)
+    } else if (length(genes.notInMONTE) > 0) {
+      genes.Table <- genes.notInMONTE.Table
     }
     
   }
@@ -511,15 +513,15 @@ makeHLATables <- function (gene, hla.table) {
 
 # parameters
 # params <- list(
-#   genes.char = "MACF1, BRDT, SLK, PIK3CA, PIK3CD, SOX2, TP63, VIM",
+#   genes.char = "TP53",
 #   zscore = 'row',
 #   PTMsites = 'most variable',
 #   min.val = -3,
 #   max.val = 3,
 #   sort.after = 'Multi.omic.subtype',
-#   id = "DiscoTab")
+#   id = "MonteTab")
 # 
-# table <- disco_table
+# table <- monte_table
 # 
 # HM.out <- myComplexHeatmap(table, params)
 # 
