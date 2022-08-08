@@ -50,7 +50,11 @@ extractGenes <- function(genes.char, table){
 makeRowLabel <- function(gene.table) {
   VMsites <- gene.table$variableSites
   VMsites[is.na(VMsites)] <- ''
-  gene.table$row_label <- paste(gene.table$ome, 
+  gene.table$row_label <- paste(paste(toupper(substr(gene.table$ome,1,1)),
+                                      substr(gene.table$ome, 
+                                             start=2, 
+                                             stop=nchar(gene.table$ome)),
+                                      sep=''), 
                                 sapply(gene.table$id, function(x) strsplit(x,'_')[[1]][1]),
                                 VMsites,
                                 sep = ' ')
@@ -172,7 +176,7 @@ getHMTableDisco <- function(genes.Table, row.anno, params) {
 }
 
 # function to add in HLA data to genes table for heatmap
-addHLAToTable <- function(genes.Table, genes.vec) {
+addHLAToTable <- function(genes.Table, genes.vec, params) {
   hla.table <- filter(MONTE.HLA.counts, geneSymbol %in% genes.vec)
   participant.names <- names(hla.table[, 3:12])
   names(hla.table) <- c('geneSymbol','HLA.Class', 
@@ -237,7 +241,7 @@ myComplexHeatmap <- function(table, params) {
       genes.Table <- genes.Table[rowSums(is.na(genes.Table)) != ncol(genes.Table), ]
       
       # add in HLA data
-      genes.Table <- addHLAToTable(genes.Table, genes.vec)
+      genes.Table <- addHLAToTable(genes.Table, genes.vec, params)
       
       # add RNA-seq and CNA by extracting from disco_table
       monte.participants.in.disco <- disco_table[, sort(participants.unique)]
@@ -300,6 +304,10 @@ myComplexHeatmap <- function(table, params) {
     stop("Invalid dataset parameter")
   }
   
+  # make levels for omes (for heatmap ordering)
+  genes.Table$ome <- factor(genes.Table$ome,
+                 levels = c('CNA', 'RNAseq','prot','phos','ubiq','acet','HLA.cls1','HLA.cls2'))
+  
   # make matrix to feed into heatmap
   genes.Matrix <- as.matrix(genes.Table[,-(1:3)])
   rownames(genes.Matrix) <- genes.Table$row_label
@@ -342,6 +350,7 @@ myComplexHeatmap <- function(table, params) {
                 col = col_fun_ratios,
                 column_title = "Participant",
                 row_title_rot = 0,
+                row_order = order(genes.Table$ome, genes.Table$row_label),
                 cluster_rows = F,
                 cluster_columns = F,
                 row_split = genes.Table$geneSymbol,
@@ -414,13 +423,13 @@ getHeatmapAnnotations <- function(participants, anno_table, anno.all, params) {
   return(anno.fig)
 }
 
-## function to get valid row labels for a single gene
-getGeneRowLabels <- function(gene, table) {
-  gene.table <- filter(table, geneSymbol == gene)
-  gene.table <- makeRowLabel(gene.table)
-  row_labels <- unique(gene.table$row_label)
-  return(row_labels)
-}
+# ## function to get valid row labels for a single gene
+# getGeneRowLabels <- function(gene, table) {
+#   gene.table <- filter(table, geneSymbol == gene)
+#   gene.table <- makeRowLabel(gene.table)
+#   row_labels <- unique(gene.table$row_label)
+#   return(row_labels)
+# }
 
 ##### function to generate scatter plot
 #  myScatterPlot <- function(table, params) {
@@ -461,10 +470,10 @@ getGeneRowLabels <- function(gene, table) {
 ## function to make HLA tables
 makeHLATables <- function (gene, hla.table) {
   participants.unique <- unique(hla.table$directory)
-  
+
   # filter for sequences matching gene
   table <- filter(hla.table, geneSymbol == gene)
-  
+
   # class 1
   class = 'cls1'
   class1.table <- filter(table, hla_class == class)
@@ -479,8 +488,8 @@ makeHLATables <- function (gene, hla.table) {
     final.class1.table[p.sequences, p] <- "\U2713"
   }
   final.class1.table[is.na(final.class1.table)] <- ' '
-  
-  
+
+
   # class 2
   class = 'cls2'
   class2.table <- filter(table, hla_class == class)
@@ -495,15 +504,15 @@ makeHLATables <- function (gene, hla.table) {
     final.class2.table[p.sequences, p] <- "\U2713"
   }
   final.class2.table[is.na(final.class2.table)] <- ' '
-  
+
   # add column for sequence
   final.class1.table$Sequence <- rownames(final.class1.table)
   final.class2.table$Sequence <- rownames(final.class2.table)
-  
+
   # reorder columns
   final.class1.table <- final.class1.table[ , c(11, 1:10)]
   final.class2.table <- final.class2.table[ , c(11, 1:10)]
-  
+
 
   return (list(cls1 = final.class1.table, cls2 = final.class2.table))
 }
@@ -513,16 +522,16 @@ makeHLATables <- function (gene, hla.table) {
 
 # parameters
 # params <- list(
-#   genes.char = "TP53",
+#   genes.char = c('EGFR', 'RB1', 'KRAS', 'STK11', "TP53"),
 #   zscore = 'row',
 #   PTMsites = 'most variable',
 #   min.val = -3,
 #   max.val = 3,
 #   sort.after = 'Multi.omic.subtype',
-#   id = "MonteTab")
+#   id = "DiscoTab")
 # 
-# table <- monte_table
-# 
+# table <- disco_table
+
 # HM.out <- myComplexHeatmap(table, params)
 # 
 # ## test download PDF

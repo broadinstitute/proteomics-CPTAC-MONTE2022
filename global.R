@@ -45,8 +45,10 @@ GENEMAX <<- 20
 monte_participants <<- unique(monte_table$participant)
 
 #########################################
+## dataset preprocessing
 
-
+# convert HLA counts to binary
+MONTE.HLA.counts[, -(1:2)] <- as.integer(MONTE.HLA.counts[,-(1:2)] > 0)
 
 ##########################################
 ## annotaion tracks shown in heatmap 
@@ -73,7 +75,7 @@ disco.params <- list( #oms = c("Transcriptome", "Ubiquitylome", "Proteome", "Pho
                      annotations.start = names(rev(anno.all))[1])
 monte.params <- list( #oms = c("Immunopeptidome", "Ubiquitylome", "Proteome", "Phosphoproteome", "Acetylome"),
                      # genes.all = sort(unique(monte_table$geneSymbol)),
-                     genes.all = sort(unique(disco.row.anno$geneSymbol)),
+                     genes.all = sort(unique(c(disco.row.anno$geneSymbol, monte_table$geneSymbol))),
                      genes.HLA = sort(unique(hla.table$geneSymbol)),
                      genes.start = c('EGFR', 'RB1', 'KRAS', 'STK11'),
                      annotations = c("Experiment", names(rev(anno.all))),
@@ -93,6 +95,7 @@ disco.params$data_description <- glue( '<p>Copy number aberrations are relative 
 monte.params$data_description <- glue('<p>The heatmap depicts multi-ome data from the 
                    MONTE workflow ("hlaft") and the serial multi-omic enrichment workflow ("noip"). 
                    CNA and RNAseq are copied from the LUAD 2020 discovery dataset.
+                   HLA tracks show whether at least one class 1 or class 2 peptide was detected in the MONTE workflow.
                    For other data types the heatmap depicts abundances observed in tumor relative to normal adjacent tissue (NAT).<p>\n
                    <table style="width:100%"><tr><th>Type</th><th># MONTE  </th><th># serial emrichment  </th><th># samples</th></tr>\n
                    <tr><td>Protein </td><td>{sum(monte_table$expt == "hlaft" & monte_table$ome == "prot")}</td>
