@@ -376,7 +376,17 @@ myComplexHeatmap <- function(table, params) {
   anno.fig.new[, -(1:3)] <- t(anno.fig)
   final.Table <- rbind(anno.fig.new, genes.Table)
   
-  return(list(HM=HM, Table=final.Table))
+  # make extra hla legend
+  if (params$id == 'MonteTab') {
+    hla.legend <- list(Legend(title = "HLA",
+                              labels=c("detected", "not detected", "NA"),
+                              legend_gp = gpar(fill = c(col_fun_ratios(c(1,0)), "grey")),
+                              at = c('detected','not detected','NA')))
+  } else {
+    hla.legend = list()
+  }
+  
+  return(list(HM=HM, Table=final.Table, hla.legend = hla.legend))
 }
 
 ## function to dynamically determine the height (in px) of the heatmap
@@ -528,10 +538,10 @@ makeHLATables <- function (gene, hla.table) {
 #   min.val = -3,
 #   max.val = 3,
 #   sort.after = 'Multi.omic.subtype',
-#   id = "DiscoTab")
+#   id = "MonteTab")
 # 
-# table <- disco_table
-
+# table <- monte_table
+#
 # HM.out <- myComplexHeatmap(table, params)
 # 
 # ## test download PDF

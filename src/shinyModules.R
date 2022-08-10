@@ -195,7 +195,10 @@ viewerTabServer <- function(id, table, params) {
             need(HM.params()$genes.char, "Input genes to see results"),
             need(HM.params()$min.val < HM.params()$max.val, "Input valid min and max"),
           )
-          draw(HM.out()$HM, annotation_legend_side='bottom')
+          draw(HM.out()$HM, 
+               annotation_legend_side='bottom',
+               heatmap_legend_list = HM.out()$hla.legend
+          )
         },
         height = dynamicHeightHM(nrow(HM.out()$Table)))
       })
@@ -211,7 +214,9 @@ viewerTabServer <- function(id, table, params) {
           pdf(file = file,
               width = 1400/72,
               height = (dynamicHeightHM(nrow(HM.out()$Table))+48)/72)
-          draw(HM.out()$HM, annotation_legend_side='bottom')
+          draw(HM.out()$HM, 
+               annotation_legend_side='bottom',
+               heatmap_legend_list = HM.out()$hla.legend)
           dev.off()
         }
       )
