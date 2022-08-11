@@ -483,19 +483,23 @@ makeHLATables <- function (gene, hla.table) {
 
   # filter for sequences matching gene
   table <- filter(hla.table, geneSymbol == gene)
+  
+  # create appropriate row labels
+  table$row_label <- ifelse(table$PTM_nuORF == "", table$sequence, 
+                            paste(table$sequence, ' (', table$PTM_nuORF, ')', sep=''))
 
   # class 1
   class = 'cls1'
   class1.table <- filter(table, hla_class == class)
-  sequences.unique <- unique(class1.table$sequence)
-  final.class1.table <- data.frame(matrix(nrow = length(sequences.unique),
+  row_label.unique <- unique(class1.table$row_label)
+  final.class1.table <- data.frame(matrix(nrow = length(row_label.unique),
                                          ncol = length(participants.unique)))
-  rownames(final.class1.table) <- sort(sequences.unique)
+  rownames(final.class1.table) <- sort(row_label.unique)
   names(final.class1.table) <- sort(participants.unique)
   for (p in participants.unique) {
-    p.sequences <- class1.table$sequence[which(class1.table$directory == p)]
-    stopifnot(length(unique(p.sequences)) == length(p.sequences))
-    final.class1.table[p.sequences, p] <- "\U2713"
+    p.row_labels <- class1.table$row_label[which(class1.table$directory == p)]
+    stopifnot(length(unique(p.row_labels)) == length(p.row_labels))
+    final.class1.table[p.row_labels, p] <- "\U2713"
   }
   final.class1.table[is.na(final.class1.table)] <- ' '
 
@@ -503,22 +507,22 @@ makeHLATables <- function (gene, hla.table) {
   # class 2
   class = 'cls2'
   class2.table <- filter(table, hla_class == class)
-  sequences.unique <- unique(class2.table$sequence)
-  final.class2.table <- data.frame(matrix(nrow = length(sequences.unique),
+  row_labels.unique <- unique(class2.table$row_label)
+  final.class2.table <- data.frame(matrix(nrow = length(row_labels.unique),
                                          ncol = length(participants.unique)))
-  rownames(final.class2.table) <- sort(sequences.unique)
+  rownames(final.class2.table) <- sort(row_labels.unique)
   names(final.class2.table) <- sort(participants.unique)
   for (p in participants.unique) {
-    p.sequences <- class2.table$sequence[which(class2.table$directory == p)]
-    stopifnot(length(unique(p.sequences)) == length(p.sequences))
-    final.class2.table[p.sequences, p] <- "\U2713"
+    p.row_labels <- class2.table$row_label[which(class2.table$directory == p)]
+    stopifnot(length(unique(p.row_labels)) == length(p.row_labels))
+    final.class2.table[p.row_labels, p] <- "\U2713"
   }
   final.class2.table[is.na(final.class2.table)] <- ' '
 
   # add column for sequence
   final.class1.table$Sequence <- rownames(final.class1.table)
   final.class2.table$Sequence <- rownames(final.class2.table)
-
+  
   # reorder columns
   final.class1.table <- final.class1.table[ , c(11, 1:10)]
   final.class2.table <- final.class2.table[ , c(11, 1:10)]

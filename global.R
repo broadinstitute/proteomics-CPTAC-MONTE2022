@@ -31,7 +31,7 @@ source("src/shinyModules.R")
 source("src/helperFunctions.R")
 
 ## import the data
-load("data/MONTE_data_2022-08-02.RData")
+load("data/MONTE_data_2022-08-11.RData")
 
 ## global parameters
 TITLESTRING <<- '<font size="5" face="times"><i><b>"MONTE enables serial immunopeptidome, ubiquitylome, proteome, phosphoproteome, acetylome analyses of sample-limited tissues"</b></i> (<a href="https://www.biorxiv.org/content/10.1101/2021.06.22.449417v1" target="_blank_">citation here</a>)</font><br>'
