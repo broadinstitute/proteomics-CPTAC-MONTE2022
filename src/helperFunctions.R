@@ -341,7 +341,8 @@ myComplexHeatmap <- function(table, params) {
                                annotation_name_side = "left",
                                na_col = "grey90",
                                annotation_legend_param = list(
-                                 direction = 'horizontal'),
+                                 direction = 'horizontal',
+                                 max_width = 350),
                                height = unit(0.5, 'cm') * nrow(anno.fig))
   column.to.sort <- anno.fig[, which(colnames(anno.fig) == sort.after)]
   
@@ -359,9 +360,13 @@ myComplexHeatmap <- function(table, params) {
                 show_row_names = T,
                 show_column_names = T,
                 name = 'relative abundance',
+                heatmap_legend_param = list(direction='horizontal',
+                                            max_width = 350,
+                                            legend_width = unit(4, 'cm')),
                 height = unit(0.5, 'cm') * nrow(genes.Matrix),
                 column_names_side = "top",
-                column_names_rot = 45,
+                column_names_rot = ifelse(params$id == "MonteTab", 45, 90),
+                column_names_gp = gpar(fontsize = ifelse(params$id == "MonteTab", 12, 8)),
                 column_gap = if (is.double(column.to.sort)) {unit(0, "mm")} else {unit(1, "mm")})
   
   # combine annotation table with genes.Table for final output
@@ -392,7 +397,7 @@ myComplexHeatmap <- function(table, params) {
 ## function to dynamically determine the height (in px) of the heatmap
 ## depending on the number of genes
 dynamicHeightHM <- function(n.entries){
-  height <- 0.3*(n.entries+12) + 3 ## height in inch
+  height <- 0.3*(n.entries+4) + 3 ## height in inch
   height <- height * 48             ## inch  to pixel
   
   return(height)

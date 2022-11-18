@@ -88,9 +88,11 @@ viewerTabUI <- function(id, label = "Viewer Tab", params) {
     ), #end column
     
     ## Heatmap
-    column(9, plotOutput(ns("hm"),
+    column(9, 
+           fluidRow(plotOutput(ns("hm"),
                          height = 'auto',
-                         width = 'auto'),
+                         width = 'auto')),
+           fluidRow(imageOutput(ns("legend")))
     ) # end column
     ), #end fluidRow
     
@@ -195,13 +197,26 @@ viewerTabServer <- function(id, table, params) {
             need(HM.params()$genes.char, "Input genes to see results"),
             need(HM.params()$min.val < HM.params()$max.val, "Input valid min and max"),
           )
+          
           draw(HM.out()$HM, 
-               annotation_legend_side='bottom',
-               heatmap_legend_list = HM.out()$hla.legend
+               heatmap_legend_list = HM.out()$hla.legend,
+               show_heatmap_legend = T, 
+               heatmap_legend_side='bottom',
+               show_annotation_legend = F
           )
         },
         height = dynamicHeightHM(nrow(HM.out()$Table)))
       })
+      
+      ## legend image
+      output$legend <- renderImage(deleteFile = FALSE,
+                                   expr = {
+                                     width = session$clientData[[paste0("output_", 
+                                                                        id, 
+                                                                        "-hm_width")]]
+                                     list(src = paste0('src/', id, '-legend.png'),
+                                          width = width,
+                                          height = width/6)})
       
       ## download HM pdf
       output$downloadHM <- downloadHandler(
@@ -215,6 +230,7 @@ viewerTabServer <- function(id, table, params) {
               width = 1400/72,
               height = (dynamicHeightHM(nrow(HM.out()$Table))+48)/72)
           draw(HM.out()$HM, 
+               heatmap_legend_side='bottom',
                annotation_legend_side='bottom',
                heatmap_legend_list = HM.out()$hla.legend)
           dev.off()

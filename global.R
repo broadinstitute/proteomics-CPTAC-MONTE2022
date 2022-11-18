@@ -12,7 +12,7 @@
 
 ###############################################################################
 # # Use this when publishing to RStudio Connect
-# options(repos = c(options('repos')$repos, 
+# options(repos = c(options('repos')$repos,
 #                   bioc = 'https://bioconductor.org/packages/3.15/bioc/'))
 ###############################################################################
 
@@ -72,14 +72,14 @@ disco.params <- list( #oms = c("Transcriptome", "Ubiquitylome", "Proteome", "Pho
                      genes.all = sort(unique(disco.row.anno$geneSymbol)),
                      genes.start = c('EGFR', 'RB1', 'KRAS', 'STK11'),
                      annotations = c("In.MONTE", names(rev(anno.all))),
-                     annotations.start = names(rev(anno.all))[1])
+                     annotations.start = "In.MONTE")
 monte.params <- list( #oms = c("Immunopeptidome", "Ubiquitylome", "Proteome", "Phosphoproteome", "Acetylome"),
                      # genes.all = sort(unique(monte_table$geneSymbol)),
                      genes.all = sort(unique(c(disco.row.anno$geneSymbol, monte_table$geneSymbol))),
                      genes.HLA = sort(unique(c(hla.table$geneSymbol, monte_table$geneSymbol))),
                      genes.start = c('EGFR', 'RB1', 'KRAS', 'STK11'),
                      annotations = c("Experiment", names(rev(anno.all))),
-                     annotations.start = names(rev(anno.all))[1])
+                     annotations.start = "Experiment")
 
 ##############################
 ## dataset descriptions
