@@ -214,9 +214,11 @@ viewerTabServer <- function(id, table, params) {
                                      width = session$clientData[[paste0("output_", 
                                                                         id, 
                                                                         "-hm_width")]]
+                                     width <- min(width, 1000)
+                                     
                                      list(src = paste0('src/', id, '-legend.png'),
                                           width = width,
-                                          height = width/6)})
+                                          height = width/6.5)})
       
       ## download HM pdf
       output$downloadHM <- downloadHandler(

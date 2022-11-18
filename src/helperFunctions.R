@@ -224,7 +224,7 @@ myComplexHeatmap <- function(table, params) {
       names(genes.notInMONTE.Table) <- c("geneSymbol", "ome", "row_label", sort(unique(table$col_label)))
       genes.notInMONTE.Table$geneSymbol <- genes.notInMONTE
       genes.notInMONTE.Table$row_label <- paste(genes.notInMONTE.Table$geneSymbol,
-                                                "no multi-ome data avaliable",
+                                                "no data avaliable",
                                                 sep = ' ')
     }
     
@@ -355,6 +355,7 @@ myComplexHeatmap <- function(table, params) {
                 cluster_rows = F,
                 cluster_columns = F,
                 row_split = genes.Table$geneSymbol,
+                row_names_max_width = unit(8, 'cm'),
                 column_split = column.to.sort, 
                 top_annotation = HM.anno,
                 show_row_names = T,
