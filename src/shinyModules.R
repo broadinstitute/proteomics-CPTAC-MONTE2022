@@ -92,7 +92,7 @@ viewerTabUI <- function(id, label = "Viewer Tab", params) {
            fluidRow(plotOutput(ns("hm"),
                          height = 'auto',
                          width = 'auto')),
-           fluidRow(imageOutput(ns("legend")))
+           fluidRow(plotOutput(ns("legend")))
     ) # end column
     ), #end fluidRow
     
@@ -206,19 +206,28 @@ viewerTabServer <- function(id, table, params) {
           )
         },
         height = dynamicHeightHM(nrow(HM.out()$Table)))
+        
+        output$legend <- renderPlot({
+          validate(
+            need(HM.params()$genes.char, "Input genes to see results"),
+            need(HM.params()$min.val < HM.params()$max.val, "Input valid min and max"),
+          )
+          
+          draw(HM.out()$complexLegend)
+        }, height = 220)
       })
       
-      ## legend image
-      output$legend <- renderImage(deleteFile = FALSE,
-                                   expr = {
-                                     width = session$clientData[[paste0("output_", 
-                                                                        id, 
-                                                                        "-hm_width")]]
-                                     width <- min(width, 1000)
-                                     
-                                     list(src = paste0('src/', id, '-legend.png'),
-                                          width = width,
-                                          height = width/6.5)})
+      # ## legend image
+      # output$legend <- renderImage(deleteFile = FALSE,
+      #                              expr = {
+      #                                width = session$clientData[[paste0("output_", 
+      #                                                                   id, 
+      #                                                                   "-hm_width")]]
+      #                                width <- min(width, 1000)
+      #                                
+      #                                list(src = paste0('src/', id, '-legend.png'),
+      #                                     width = width,
+      #                                     height = width/6.5)})
       
       ## download HM pdf
       output$downloadHM <- downloadHandler(
@@ -334,9 +343,9 @@ HLATableUI <- function(id, label = "HLA Table", params) {
     
     column(9,
            fluidRow(fluidRow(h4("HLA Class 1 Sequences")), 
-                    fluidRow(tableOutput(ns("hla.cls1")))),
+                    fluidRow(reactableOutput(ns("hla.cls1")))),
            fluidRow(fluidRow(h4("HLA Class 2 Sequences")), 
-                    fluidRow(tableOutput(ns("hla.cls2")))),
+                    fluidRow(reactableOutput(ns("hla.cls2")))),
            style='padding-left:25px; padding-right:5px; padding-top:0px; padding-bottom:0px'
     ) # end column
     ) # end fluidRow
@@ -358,25 +367,78 @@ HLATableServer <- function(id, hla.table, params) {
       
       HLA.out <- reactive({makeHLATables(input$hla.gene, hla.table)})
       
-      output$hla.cls1 <- renderTable({
-        validate(
-          need(nrow(HLA.out()$cls1) > 0, 
-               "No HLA class 1 sequences found for inputted gene")
-        )
-        HLA.out()$cls1
-      },
-      striped = T,
-      bordered = T)
+      # output$hla.cls1 <- DT::renderDataTable({
+      #   validate(
+      #     need(nrow(HLA.out()$cls1) > 0, 
+      #          "No HLA class 1 sequences found for inputted gene")
+      #   )
+      #   
+      #   headerCallBack <- c(
+      #     "function(thead, data, start, end, display){",
+      #     "  var tooltips = ['tooltip1','tooltip2','tooltip3','tooltip4','tooltip5'];",
+      #     "  for(var i=0; i<5; i++){",
+      #     "    $('th:eq('+i+')',thead).attr('title', tooltips[i]);",
+      #     "  }",
+      #     "}"
+      #   )
+      #   
+      #   DT::datatable(HLA.out()$cls1, 
+      #                 rownames = FALSE,
+      #               #  options = list(headerCallback = JS(headerCallback)))
+      #               options = list(headercallback = JS(headerCallBack)))
+      #                 
+      # })
       
-      output$hla.cls2 <- renderTable({
+      output$hla.cls1 <- renderReactable({
         validate(
-          need(nrow(HLA.out()$cls2) > 0, 
-               "No HLA class 2 sequences found for inputted gene")
+          need(nrow(HLA.out()$cls1) > 0, "No HLA class 1 sequences found for this gene")
         )
-        HLA.out()$cls2
-      },
-                                     striped = T,
-                                     bordered = T)
+        
+        data <- HLA.out()$cls1
+        
+        with_tooltip <- function(value, tooltip, ...) {
+          div(style = "cursor: help",
+              tippy(value, 
+                    tooltip = paste0("<span style='font-size:14px;'>",
+                                     tooltip,
+                                     "<span>"),
+                    allowHTML = TRUE))
+        }
+        
+        participant_columns <- setdiff(names(data), 'Sequence')
+        columns_style <- lapply(participant_columns, function(x) {
+          
+          hla.type.headers <- setdiff(names(hla.type.table), 'Participant')
+          tooltip = ''
+          for (hla.type in hla.type.headers) {
+            tooltip = paste0(tooltip, 
+                             '<b>', hla.type, ':</b> ',
+                             hla.type.table[[hla.type]][hla.type.table$Participant == x],
+                             '<br>')
+          }
+          
+          colDef(header = with_tooltip(x, tooltip))
+        })
+        names(columns_style) <- participant_columns
+        columns_style$Sequence <- colDef(minWidth = 150)
+        
+        reactable(data = data,
+                  rownames = FALSE,
+                  columns = columns_style,
+                  striped = TRUE,
+                  bordered = TRUE)
+      })
+      
+      output$hla.cls2 <- renderReactable({
+        validate(
+          need(nrow(HLA.out()$cls2) > 0, "No HLA class 2 sequences found for this gene")
+        )
+        reactable(data = HLA.out()$cls2,
+                  rownames = FALSE,
+                  striped = TRUE,
+                  columns = list(Sequence = colDef(minWidth = 150)),
+                  bordered = TRUE)
+      })
       
       ## download class 1
       output$downloadHLA <- downloadHandler(

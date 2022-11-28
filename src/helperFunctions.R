@@ -392,7 +392,10 @@ myComplexHeatmap <- function(table, params) {
     hla.legend = list()
   }
   
-  return(list(HM=HM, Table=final.Table, hla.legend = hla.legend))
+  return(list(HM=HM, 
+              Table=final.Table, 
+              hla.legend = hla.legend, 
+              complexLegend = makeComplexLegend(column.anno.col)))
 }
 
 ## function to dynamically determine the height (in px) of the heatmap
@@ -537,6 +540,30 @@ makeHLATables <- function (gene, hla.table) {
   return (list(cls1 = final.class1.table, cls2 = final.class2.table))
 }
 
+makeComplexLegend <- function(column.anno.col) {
+  legend_list <- list()
+  for (i in c(length(column.anno.col), 1:(length(column.anno.col)-1))) {
+    title = names(column.anno.col)[i]
+    color = column.anno.col[[title]]
+    
+    if (typeof(color) == 'character') {
+      lgd <- Legend(labels = setdiff(names(color), 'NA'), title = title, legend_gp=gpar(fill=color))
+      
+    } else {
+      lgd <- Legend(col_fun = color, title = title, direction = 'horizontal')
+    }
+    legend_list <- c(legend_list, lgd)
+    
+    
+  }
+  
+  pd = packLegend(list = legend_list, 
+                  column_gap = unit(8, "mm"),
+                  direction = 'horizontal', 
+                  max_width = unit(20, 'cm'))
+  return(pd)
+}
+
 ###############################################################################
 ## FOR TESTING PURPOSES ONLY
 
@@ -551,7 +578,7 @@ makeHLATables <- function (gene, hla.table) {
 #   id = "MonteTab")
 # 
 # table <- monte_table
-#
+# 
 # HM.out <- myComplexHeatmap(table, params)
 # 
 # ## test download PDF
