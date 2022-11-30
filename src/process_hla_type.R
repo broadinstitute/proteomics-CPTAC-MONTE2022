@@ -7,7 +7,8 @@
 # 
 # save(list = ls(), file = 'data/MONTE_data_2022-11-28.RData')
 
-hla.athena <- read.csv('original-data/HLA_1_data_example_11-28-2022.csv')
+hla.athena <- read.csv('original-data/HLA_1_data_example_11-28-2022.csv',
+                       na.strings = 'N/A')
 hla.athena$directory <- gsub('-', '.', hla.athena$directory)
 
 # COMBINATIONS OF geneSymbol + sequence DO NOT ALL HAVE THE SAME TYPE
@@ -20,10 +21,10 @@ hla.athena <- select(hla.athena, directory, geneSymbol, sequence, allele, Msi_HL
 
 load("data/MONTE_data_2022-11-28.RData")
 
-# merge hla tables
-hla.athena$hla_class <- rep('cls1', nrow(hla.athena))
-
-o <- merge(hla.table, hla.athena, by = c('directory', 'geneSymbol', 'sequence'), all.x = T)
+# # merge hla tables
+# hla.athena$hla_class <- rep('cls1', nrow(hla.athena))
+# 
+# o <- merge(hla.table, hla.athena, by = c('directory', 'geneSymbol', 'sequence'), all.x = T)
 
 
 

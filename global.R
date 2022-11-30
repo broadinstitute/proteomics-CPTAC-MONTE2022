@@ -2,8 +2,9 @@
 ## Filename: global.R
 ## Created: July 5, 2022
 ## Author: Stephanie Vartany
-## Purpose: Data viewer for "MONTE enables serial immunopeptidome, ubiquitylome,
-## proteome, phosphoproteome, acetylome analyses of sample-limited tissues"
+## Purpose: Data viewer for "Workflow enabling deepscale immunopeptidome, 
+## proteome, ubiquitylome, phosphoproteome, and acetylome analyses of 
+## sample-limited tissues"
 ## This file imports the data, completes necessary preprocessing, and defines
 ## global parameters. It also defines functions from src/shinyModules.R and
 ## src/helperFunctions.R

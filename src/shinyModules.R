@@ -209,8 +209,8 @@ viewerTabServer <- function(id, table, params) {
         
         output$legend <- renderPlot({
           validate(
-            need(HM.params()$genes.char, "Input genes to see results"),
-            need(HM.params()$min.val < HM.params()$max.val, "Input valid min and max"),
+            need(HM.params()$genes.char, ""),
+            need(HM.params()$min.val < HM.params()$max.val, ""),
           )
           
           draw(HM.out()$complexLegend)
@@ -337,12 +337,15 @@ HLATableUI <- function(id, label = "HLA Table", params) {
       ## Instructions
       p(strong("Getting started")),
       p("Enter your gene name of interest (official gene symbols, e.g. PIK3CA) to view associated HLA class 1 and class 2 sequences."),
+      br(),
+      p("Download HLA tables to see more information, including HLA typing and HLAthena predictions."),
       br()
     ) #end wellPanel
     ), #end column
     
     column(9,
            fluidRow(fluidRow(h4("HLA Class 1 Sequences")), 
+                    fluidRow(reactableOutput(ns("hla.type"))),
                     fluidRow(reactableOutput(ns("hla.cls1")))),
            fluidRow(fluidRow(h4("HLA Class 2 Sequences")), 
                     fluidRow(reactableOutput(ns("hla.cls2")))),
@@ -367,66 +370,59 @@ HLATableServer <- function(id, hla.table, params) {
       
       HLA.out <- reactive({makeHLATables(input$hla.gene, hla.table)})
       
-      # output$hla.cls1 <- DT::renderDataTable({
-      #   validate(
-      #     need(nrow(HLA.out()$cls1) > 0, 
-      #          "No HLA class 1 sequences found for inputted gene")
-      #   )
-      #   
-      #   headerCallBack <- c(
-      #     "function(thead, data, start, end, display){",
-      #     "  var tooltips = ['tooltip1','tooltip2','tooltip3','tooltip4','tooltip5'];",
-      #     "  for(var i=0; i<5; i++){",
-      #     "    $('th:eq('+i+')',thead).attr('title', tooltips[i]);",
-      #     "  }",
-      #     "}"
-      #   )
-      #   
-      #   DT::datatable(HLA.out()$cls1, 
-      #                 rownames = FALSE,
-      #               #  options = list(headerCallback = JS(headerCallback)))
-      #               options = list(headercallback = JS(headerCallBack)))
-      #                 
-      # })
-      
       output$hla.cls1 <- renderReactable({
         validate(
           need(nrow(HLA.out()$cls1) > 0, "No HLA class 1 sequences found for this gene")
         )
-        
+
         data <- HLA.out()$cls1
-        
+
         with_tooltip <- function(value, tooltip, ...) {
           div(style = "cursor: help",
-              tippy(value, 
+              tippy(value,
                     tooltip = paste0("<span style='font-size:14px;'>",
                                      tooltip,
                                      "<span>"),
                     allowHTML = TRUE))
         }
-        
+
         participant_columns <- setdiff(names(data), 'Sequence')
         columns_style <- lapply(participant_columns, function(x) {
-          
+
           hla.type.headers <- setdiff(names(hla.type.table), 'Participant')
           tooltip = ''
           for (hla.type in hla.type.headers) {
-            tooltip = paste0(tooltip, 
+            tooltip = paste0(tooltip,
                              '<b>', hla.type, ':</b> ',
                              hla.type.table[[hla.type]][hla.type.table$Participant == x],
                              '<br>')
           }
-          
+
           colDef(header = with_tooltip(x, tooltip))
         })
         names(columns_style) <- participant_columns
         columns_style$Sequence <- colDef(minWidth = 150)
-        
+
         reactable(data = data,
                   rownames = FALSE,
                   columns = columns_style,
                   striped = TRUE,
                   bordered = TRUE)
+      })
+      
+      output$hla.type <- renderReactable({
+        validate(need(nrow(HLA.out()$cls1) > 0, ""))
+        
+        data = as.data.frame(t(hla.type.table[,2:7]))
+        names(data) <- hla.type.table$Participant
+        data$Type <- rownames(data)
+        data <- data[,c('Type', setdiff(colnames(HLA.out()$cls1), 'Sequence'))]
+        
+        reactable(data = data,
+                  bordered = TRUE,
+                  striped = TRUE,
+                  rownames = FALSE,
+                  columns = list(Type = colDef(minWidth = 150)))
       })
       
       output$hla.cls2 <- renderReactable({
@@ -450,20 +446,18 @@ HLATableServer <- function(id, hla.table, params) {
                                      '.xlsx',
                                      sep='')},
         content = function(file) {
-          cls1.table <- HLA.out()$cls1
-          cls2.table <- HLA.out()$cls2
+          sequence.table <- merge(
+            x = filter(hla.table, geneSymbol == input$hla.gene),
+            y = filter(hla.athena, geneSymbol == input$hla.gene),
+            by = c('directory', 'geneSymbol', 'sequence'),
+            all.x = TRUE)
           
-          # convert \U2713 or ' ' to 0/1
-          cls1.table[cls1.table == '\U2713'] <- '1'
-          cls1.table[cls1.table == ' '] <- '0'
-          cls2.table[cls2.table == '\U2713'] <- '1'
-          cls2.table[cls2.table == ' '] <- '0'
+          names(sequence.table)[1] <- 'Participant'
           
-          
-          WriteXLS(c('cls1.table', 'cls2.table'),
+          WriteXLS(c('sequence.table', 'hla.type.table'),
                    ExcelFileName = file,
-                   SheetNames = c(paste(input$hla.gene, 'Class 1 Sequences', sep= ' '),
-                                  paste(input$hla.gene, 'Class 2 Sequences', sep= ' ')),
+                   SheetNames = c(paste(input$hla.gene, 'HLA Sequences'),
+                                  'HLA Type'),
                    row.names = F)
         }
       )
