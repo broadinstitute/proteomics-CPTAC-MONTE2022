@@ -10,88 +10,88 @@
 
 ## User interface for each tab in the data viewer
 viewerTabUI <- function(id, label = "Viewer Tab", params) {
-
+  
   ns <- NS(id) # namespace function
   
   tagList(
     ## UI for heatmap
     h3("Heatmap"),
     fluidRow(column(3, wellPanel(
-     
-     ## text input
-     selectizeInput(ns('genes'), 
-                    label=paste('Enter your genes of interest (max. ',
-                                GENEMAX,')', sep=''), 
-                    selected=params$genes.start,
-                    choices = NULL,
-                    multiple=T),
-     
-     br(),
-     
-     ## inputs to customize heatmap
-     fluidRow(
-       column(6, radioButtons(ns('zscore'), 
-                              label='Z-score', 
-                              choices=c('row', 'none'), 
-                              selected='row')),
-       
-       column(6, 
-              radioButtons(ns('PTMsites'), 
-                           label='PTM sites', 
-                           choices=c('most variable', 'all'), 
-                           selected='most variable'))
-       ), # end fluidRow
-     
-     fluidRow(
-       column(6, textInput(ns('min.val'), 
-                           label='min', 
-                           value=-2, 
-                           width='80%')),
-       column(6, textInput(ns('max.val'), 
-                           label='max', 
-                           value=2, 
-                           width='80%'))
-     ), #end fluidRow
-     
-     ## inputs for sorting
-     fluidRow(
-       column(12, selectizeInput(ns('sort.after'), 'Sort by', 
-                                 choices= params$annotations,
-                                 selected=params$annotations.start, 
-                                 multiple=FALSE))  
-     ), #end fluidRow
-     
-     br(),
-     
-     # ## update plot
-     # fluidRow(column(12,
-     #                 actionButton(ns("update"), "Update Heatmap",
-     #                 icon("paper-plane"), 
-     #                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
-     # 
-     # br(),
-     
-     ## download buttons
-     fluidRow(column(6, downloadButton(ns('downloadHM'), 'Download PDF')),
-              column(6, downloadButton(ns('downloadTab'), 'Download Excel'))),
-     
-     br(),
-     
-     ## Instructions
-     p(strong("Getting started")),
-     p("Enter your gene names of interest (official gene symbols, e.g. EGFR) into the text field. You can enter up to 20 genes."),
-     br(),
-     p(strong("Dataset")),
-     HTML(params$data_description),
-     
+      
+      ## text input
+      selectizeInput(ns('genes'), 
+                     label=paste('Enter your genes of interest (max. ',
+                                 GENEMAX,')', sep=''), 
+                     selected=params$genes.start,
+                     choices = NULL,
+                     multiple=T),
+      
+      br(),
+      
+      ## inputs to customize heatmap
+      fluidRow(
+        column(6, radioButtons(ns('zscore'), 
+                               label='Z-score', 
+                               choices=c('row', 'none'), 
+                               selected='row')),
+        
+        column(6, 
+               radioButtons(ns('PTMsites'), 
+                            label='PTM sites', 
+                            choices=c('most variable', 'all'), 
+                            selected='most variable'))
+      ), # end fluidRow
+      
+      fluidRow(
+        column(6, textInput(ns('min.val'), 
+                            label='min', 
+                            value=-2, 
+                            width='80%')),
+        column(6, textInput(ns('max.val'), 
+                            label='max', 
+                            value=2, 
+                            width='80%'))
+      ), #end fluidRow
+      
+      ## inputs for sorting
+      fluidRow(
+        column(12, selectizeInput(ns('sort.after'), 'Sort by', 
+                                  choices= params$annotations,
+                                  selected=params$annotations.start, 
+                                  multiple=FALSE))  
+      ), #end fluidRow
+      
+      br(),
+      
+      # ## update plot
+      # fluidRow(column(12,
+      #                 actionButton(ns("update"), "Update Heatmap",
+      #                 icon("paper-plane"), 
+      #                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+      # 
+      # br(),
+      
+      ## download buttons
+      fluidRow(column(6, downloadButton(ns('downloadHM'), 'Download PDF')),
+               column(6, downloadButton(ns('downloadTab'), 'Download Excel'))),
+      
+      br(),
+      
+      ## Instructions
+      p(strong("Getting started")),
+      p("Enter your gene names of interest (official gene symbols, e.g. EGFR) into the text field. You can enter up to 20 genes."),
+      br(),
+      p(strong("Dataset")),
+      HTML(params$data_description),
+      
     ) #end wellPanel
     ), #end column
     
     ## Heatmap
     column(9, 
            fluidRow(plotOutput(ns("hm"),
-                         height = 'auto',
-                         width = 'auto')),
+                               height = 'auto',
+                               width = 'auto')),
            fluidRow(plotOutput(ns("legend")))
     ) # end column
     ), #end fluidRow
@@ -100,7 +100,7 @@ viewerTabUI <- function(id, label = "Viewer Tab", params) {
     br(),
     
     
-################ COMMENTED OUT FOR NOW
+    ################ COMMENTED OUT FOR NOW
     # ## UI for scatter plot
     # h3("Scatter Plot"),
     # fluidRow(column(3, wellPanel(
@@ -151,11 +151,11 @@ viewerTabUI <- function(id, label = "Viewer Tab", params) {
     # column(5, plotOutput(ns("scatter"))),
     # column(4, "There will be a table with HLA sequences here")
     # ) #end fluidRow
-
-################
-
-  ) #end tagList
     
+    ################
+    
+  ) #end tagList
+  
 }
 
 ## server for each tab in the data viewer
@@ -174,21 +174,21 @@ viewerTabServer <- function(id, table, params) {
       
       ## get heatmap parameters
       HM.params <- reactive({list(genes.char = input$genes,
-                           zscore = input$zscore,
-                           PTMsites = input$PTMsites,
-                           min.val = as.numeric(input$min.val),
-                           max.val = as.numeric(input$max.val),
-                           sort.after = input$sort.after,
-                           id = id)})
+                                  zscore = input$zscore,
+                                  PTMsites = input$PTMsites,
+                                  min.val = as.numeric(input$min.val),
+                                  max.val = as.numeric(input$max.val),
+                                  sort.after = input$sort.after,
+                                  id = id)})
       
       ## generate complex heatmap
       HM.out <- reactive({
-          validate(
-            need(HM.params()$genes.char, "Input genes to see results"),
-            need(HM.params()$min.val < HM.params()$max.val, "Input valid min and max")
-          )
-          myComplexHeatmap(table, HM.params())
-        })
+        validate(
+          need(HM.params()$genes.char, "Input genes to see results"),
+          need(HM.params()$min.val < HM.params()$max.val, "Input valid min and max")
+        )
+        myComplexHeatmap(table, HM.params())
+      })
       
       ## render complex heatmap
       observe({
@@ -265,7 +265,7 @@ viewerTabServer <- function(id, table, params) {
         }
       )
       
-########### COMMENTED OUT FOR NOW 
+      ########### COMMENTED OUT FOR NOW 
       # ## scatter plot
       # updateSelectizeInput(session,
       #                      inputId = "scatter.gene.x",
@@ -304,7 +304,7 @@ viewerTabServer <- function(id, table, params) {
       #     )
       #     myScatterPlot(table, scatter.params())
       #   })})
-##########################################
+      ##########################################
       
       
     }
@@ -326,17 +326,16 @@ HLATableUI <- function(id, label = "HLA Table", params) {
                      selected=params$genes.start[1],
                      choices = NULL,
                      multiple=F),
-      
-      br(),
-      
-      ## download button
-      fluidRow(column(12, downloadButton(ns('downloadHLA'), 'Download HLA Tables'))),
-      
+      checkboxInput(ns('showHlaType'), 'show HLA-I typing'),
       br(),
       
       ## Instructions
       p(strong("Getting started")),
-      p("Enter your gene name of interest (official gene symbols, e.g. PIK3CA) to view associated HLA class 1 and class 2 sequences."),
+      p('Enter your gene name of interest (official gene symbols, e.g. PIK3CA) to view associated HLA-I and HLA-II sequences. Hover over participant names to view HLA-I types, or click the checkbox "show HLA-I typing" to view as a table.'),
+      br(),
+      
+      ## download button
+      fluidRow(column(12, downloadButton(ns('downloadHLA'), 'Download HLA Tables'))),
       br(),
       p("Download HLA tables to see more information, including HLA typing and HLAthena predictions."),
       br()
@@ -344,12 +343,16 @@ HLATableUI <- function(id, label = "HLA Table", params) {
     ), #end column
     
     column(9,
-           fluidRow(fluidRow(h4("HLA Class 1 Sequences")), 
-                    fluidRow(reactableOutput(ns("hla.type"))),
+           conditionalPanel(
+             condition = 'input.showHlaType == true',
+             fluidRow(fluidRow(h4("HLA-I Typing")),
+                      fluidRow(reactableOutput(ns("hla.type")))),
+             ns = ns),
+           fluidRow(fluidRow(h4("HLA-I Sequences")), 
                     fluidRow(reactableOutput(ns("hla.cls1")))),
-           fluidRow(fluidRow(h4("HLA Class 2 Sequences")), 
+           fluidRow(fluidRow(h4("HLA-I Sequences")), 
                     fluidRow(reactableOutput(ns("hla.cls2")))),
-           style='padding-left:25px; padding-right:5px; padding-top:0px; padding-bottom:0px'
+           style='padding-left:25px; padding-right:55px; padding-top:0px; padding-bottom:0px'
     ) # end column
     ) # end fluidRow
   )
@@ -374,9 +377,9 @@ HLATableServer <- function(id, hla.table, params) {
         validate(
           need(nrow(HLA.out()$cls1) > 0, "No HLA class 1 sequences found for this gene")
         )
-
+        
         data <- HLA.out()$cls1
-
+        
         with_tooltip <- function(value, tooltip, ...) {
           div(style = "cursor: help",
               tippy(value,
@@ -385,10 +388,10 @@ HLATableServer <- function(id, hla.table, params) {
                                      "<span>"),
                     allowHTML = TRUE))
         }
-
+        
         participant_columns <- setdiff(names(data), 'Sequence')
         columns_style <- lapply(participant_columns, function(x) {
-
+          
           hla.type.headers <- setdiff(names(hla.type.table), 'Participant')
           tooltip = ''
           for (hla.type in hla.type.headers) {
@@ -397,12 +400,12 @@ HLATableServer <- function(id, hla.table, params) {
                              hla.type.table[[hla.type]][hla.type.table$Participant == x],
                              '<br>')
           }
-
+          
           colDef(header = with_tooltip(x, tooltip))
         })
         names(columns_style) <- participant_columns
         columns_style$Sequence <- colDef(minWidth = 150)
-
+        
         reactable(data = data,
                   rownames = FALSE,
                   columns = columns_style,
@@ -457,7 +460,7 @@ HLATableServer <- function(id, hla.table, params) {
           WriteXLS(c('sequence.table', 'hla.type.table'),
                    ExcelFileName = file,
                    SheetNames = c(paste(input$hla.gene, 'HLA Sequences'),
-                                  'HLA Type'),
+                                  'HLA-I Type'),
                    row.names = F)
         }
       )
