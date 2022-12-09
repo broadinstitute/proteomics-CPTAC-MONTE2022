@@ -350,7 +350,7 @@ HLATableUI <- function(id, label = "HLA Table", params) {
              ns = ns),
            fluidRow(fluidRow(h4("HLA-I Sequences")), 
                     fluidRow(reactableOutput(ns("hla.cls1")))),
-           fluidRow(fluidRow(h4("HLA-I Sequences")), 
+           fluidRow(fluidRow(h4("HLA-II Sequences")), 
                     fluidRow(reactableOutput(ns("hla.cls2")))),
            style='padding-left:25px; padding-right:55px; padding-top:0px; padding-bottom:0px'
     ) # end column
