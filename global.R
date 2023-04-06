@@ -37,7 +37,7 @@ source("src/helperFunctions.R")
 load("data/MONTE_data_2022-11-28.RData")
 
 ## global parameters
-TITLESTRING <<- '<font size="5" face="times"><i><b>"Workflow enabling deepscale immunopeptidome, proteome, ubiquitylome, phosphoproteome, and acetylome analyses of sample-limited tissues"</b></i> (<a href="https://www.biorxiv.org/content/10.1101/2021.06.22.449417v1" target="_blank_">citation here</a>)</font><br>'
+TITLESTRING <<- '<font size="5" face="times"><i><b>"Workflow enabling deepscale immunopeptidome, proteome, ubiquitylome, phosphoproteome, and acetylome analyses of sample-limited tissues"</b></i> (<a href="https://doi.org/10.1038/s41467-023-37547-0" target="_blank_">Abelin, J. G., et. al., <i> Nat. Commun.</i> 2023</a>)</font><br>'
 
 WINDOWTITLE <<- 'MONTE-CPTAC-LUAD-2022' # TODO: edit this
 FILENAMESTRING <<- 'MONTE-CPTAC-LUAD-2022' # TODO: edit this
